@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+# @Author: bo.shi
+# @Date:   2019-11-04 09:56:36
+# @Last Modified by:   bo.shi
+# @Last Modified time: 2019-11-08 10:57:46
 # coding=utf-8
 # Copyright 2018 The Google AI Language Team Authors.
 #
@@ -194,10 +199,10 @@ class DataProcessor(object):
         raise NotImplementedError()
 
     @classmethod
-    def _read_tsv(cls, input_file, quotechar=None):
+    def _read_tsv(cls, input_file, delimiter="\t", quotechar=None):
         """Reads a tab separated value file."""
         with tf.gfile.Open(input_file, "r") as f:
-            reader = csv.reader(f, delimiter="\t", quotechar=quotechar)
+            reader = csv.reader(f, delimiter=delimiter, quotechar=quotechar)
             lines = []
             for line in reader:
                 lines.append(line)
@@ -213,44 +218,6 @@ class DataProcessor(object):
                 lines.append(line.strip().split("_!_"))
             return lines
 
-class THUCNewsProcessor(DataProcessor):
-    """Processor for the THUCNews data set (GLUE version)."""
-
-    def get_train_examples(self, data_dir):
-        """See base class."""
-        return self._create_examples(
-            self._read_txt(os.path.join(data_dir, "train.txt")), "train")
-
-    def get_dev_examples(self, data_dir):
-        """See base class."""
-        return self._create_examples(
-            self._read_txt(os.path.join(data_dir, "dev.txt")), "dev")
-
-    def get_test_examples(self, data_dir):
-        """See base class."""
-        return self._create_examples(
-            self._read_txt(os.path.join(data_dir, "test.txt")), "test")
-
-    def get_labels(self):
-        """See base class."""
-        labels = []
-        for i in range(14):
-            labels.append(str(i))
-        return labels
-
-    def _create_examples(self, lines, set_type):
-        """Creates examples for the training and dev sets."""
-        examples = []
-        for (i, line) in enumerate(lines):
-            if i == 0 or len(line) < 3:
-                continue
-            guid = "%s-%s" % (set_type, i)
-            text_a = tokenization.convert_to_unicode(line[3])
-            text_b = None
-            label = tokenization.convert_to_unicode(line[0])
-            examples.append(
-                InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
-        return examples
 class InewsProcessor(DataProcessor):
   """Processor for the MRPC data set (GLUE version)."""
 
@@ -478,13 +445,90 @@ class TnewsProcessor(DataProcessor):
             text_a = tokenization.convert_to_unicode(line[3])
             text_b = None
             if set_type == "test":
-                label = "0"
+                label = tokenization.convert_to_unicode(line[1])
             else:
                 label = tokenization.convert_to_unicode(line[1])
             examples.append(
                 InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
         return examples
 
+class THUCNewsProcessor(DataProcessor):
+    """Processor for the THUCNews data set (GLUE version)."""
+
+    def get_train_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_txt(os.path.join(data_dir, "train.txt")), "train")
+
+    def get_dev_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_txt(os.path.join(data_dir, "dev.txt")), "dev")
+
+    def get_test_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_txt(os.path.join(data_dir, "test.txt")), "test")
+
+    def get_labels(self):
+        """See base class."""
+        labels = []
+        for i in range(14):
+            labels.append(str(i))
+        return labels
+
+    def _create_examples(self, lines, set_type):
+        """Creates examples for the training and dev sets."""
+        examples = []
+        for (i, line) in enumerate(lines):
+            if i == 0 or len(line) < 3:
+                continue
+            guid = "%s-%s" % (set_type, i)
+            text_a = tokenization.convert_to_unicode(line[3])
+            text_b = None
+            label = tokenization.convert_to_unicode(line[0])
+            examples.append(
+                InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
+        return examples
+
+class iFLYTEKDataProcessor(DataProcessor):
+    """Processor for the iFLYTEKData data set (GLUE version)."""
+
+    def get_train_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_txt(os.path.join(data_dir, "train.txt")), "train")
+
+    def get_dev_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_txt(os.path.join(data_dir, "dev.txt")), "dev")
+
+    def get_test_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_txt(os.path.join(data_dir, "test.txt")), "test")
+
+    def get_labels(self):
+        """See base class."""
+        labels = []
+        for i in range(119):
+            labels.append(str(i))
+        return labels
+
+    def _create_examples(self, lines, set_type):
+        """Creates examples for the training and dev sets."""
+        examples = []
+        for (i, line) in enumerate(lines):
+            if i == 0:
+                continue
+            guid = "%s-%s" % (set_type, i)
+            text_a = tokenization.convert_to_unicode(line[1])
+            text_b = None
+            label = tokenization.convert_to_unicode(line[0])
+            examples.append(
+                InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
+        return examples
 
 class XnliProcessor(DataProcessor):
     """Processor for the XNLI data set."""
@@ -590,6 +634,52 @@ class LCQMCProcessor(DataProcessor):
                 label = tokenization.convert_to_unicode(line[2])
                 text_a = tokenization.convert_to_unicode(line[0])
                 text_b = tokenization.convert_to_unicode(line[1])
+                examples.append(
+                    InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
+            except Exception:
+                print('###error.i:', i, line)
+        return examples
+
+class JDCOMMENTProcessor(DataProcessor):
+    """Processor for the internal data set. sentence pair classification"""
+
+    def __init__(self):
+        self.language = "zh"
+
+    def get_train_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_tsv(os.path.join(data_dir, "jd_train.csv"),",", "\""), "train")
+        # dev_0827.tsv
+
+    def get_dev_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_tsv(os.path.join(data_dir, "jd_dev.csv"),",", "\""), "dev")
+
+    def get_test_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_tsv(os.path.join(data_dir, "jd_test.csv"),",", "\""), "test")
+
+    def get_labels(self):
+        """See base class."""
+        return ["1", "2", "3", "4", "5"]
+        # return ["-1","0", "1"]
+
+    def _create_examples(self, lines, set_type):
+        """Creates examples for the training and dev sets."""
+        examples = []
+        print("length of lines:", len(lines))
+        for (i, line) in enumerate(lines):
+            #print('#i:',i,line)
+            if i == 0:
+                continue
+            guid = "%s-%s" % (set_type, i)
+            try:
+                label = tokenization.convert_to_unicode(line[0])
+                text_a = tokenization.convert_to_unicode(line[1])
+                text_b = tokenization.convert_to_unicode(line[2])
                 examples.append(
                     InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
             except Exception:
@@ -1181,9 +1271,11 @@ def main(_):
         "xnli": XnliProcessor,
         "tnews": TnewsProcessor,
         "inews": InewsProcessor,
+        "jdcomment": JDCOMMENTProcessor,
         "lcqmc": LCQMCProcessor,
         "thucnews": THUCNewsProcessor,
-        "bq": BQProcessor
+        "bq": BQProcessor,
+        "iflydata": iFLYTEKDataProcessor,
     }
 
     tokenization.validate_case_matches_checkpoint(FLAGS.do_lower_case,
@@ -1235,6 +1327,7 @@ def main(_):
     num_train_steps = None
     num_warmup_steps = None
     if FLAGS.do_train:
+        print("data_dir:", FLAGS.data_dir)
         train_examples = processor.get_train_examples(FLAGS.data_dir)
         num_train_steps = int(
             len(train_examples) / FLAGS.train_batch_size * FLAGS.num_train_epochs)
@@ -1466,19 +1559,26 @@ def main(_):
             drop_remainder=predict_drop_remainder)
 
         result = estimator.predict(input_fn=predict_input_fn)
-
+        index2label_map = {}
+        for (i, label) in enumerate(label_list):
+          index2label_map[i] = label
+        output_predict_file_label = os.path.join(FLAGS.output_dir, "test_results_label.tsv")
         output_predict_file = os.path.join(FLAGS.output_dir, "test_results.tsv")
-        with tf.gfile.GFile(output_predict_file, "w") as writer:
+        with tf.gfile.GFile(output_predict_file_label, "w") as writer_label:
+          with tf.gfile.GFile(output_predict_file, "w") as writer:
+            writer_label.write("predict_label" + "\n")
             num_written_lines = 0
             tf.logging.info("***** Predict results *****")
             for (i, prediction) in enumerate(result):
                 probabilities = prediction["probabilities"]
+                label_index = probabilities.argmax(0)
                 if i >= num_actual_predict_examples:
                     break
                 output_line = "\t".join(
                     str(class_probability)
                     for class_probability in probabilities) + "\n"
                 writer.write(output_line)
+                writer_label.write(str(index2label_map[label_index]) + "\n")
                 num_written_lines += 1
         assert num_written_lines == num_actual_predict_examples
 

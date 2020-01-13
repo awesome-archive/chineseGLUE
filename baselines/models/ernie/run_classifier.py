@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+# @Author: bo.shi
+# @Date:   2019-11-04 09:56:36
+# @Last Modified by:   bo.shi
+# @Last Modified time: 2019-11-10 15:50:33
 # coding=utf-8
 # Copyright 2018 The Google AI Language Team Authors.
 #
@@ -251,6 +256,46 @@ class THUCNewsProcessor(DataProcessor):
             examples.append(
                 InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
         return examples
+
+class iFLYTEKDataProcessor(DataProcessor):
+    """Processor for the iFLYTEKData data set (GLUE version)."""
+
+    def get_train_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_txt(os.path.join(data_dir, "train.txt")), "train")
+
+    def get_dev_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_txt(os.path.join(data_dir, "dev.txt")), "dev")
+
+    def get_test_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_txt(os.path.join(data_dir, "test.txt")), "test")
+
+    def get_labels(self):
+        """See base class."""
+        labels = []
+        for i in range(119):
+            labels.append(str(i))
+        return labels
+
+    def _create_examples(self, lines, set_type):
+        """Creates examples for the training and dev sets."""
+        examples = []
+        for (i, line) in enumerate(lines):
+            if i == 0:
+                continue
+            guid = "%s-%s" % (set_type, i)
+            text_a = tokenization.convert_to_unicode(line[1])
+            text_b = None
+            label = tokenization.convert_to_unicode(line[0])
+            examples.append(
+                InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
+        return examples
+
 class InewsProcessor(DataProcessor):
   """Processor for the MRPC data set (GLUE version)."""
 
@@ -478,13 +523,52 @@ class TnewsProcessor(DataProcessor):
             text_a = tokenization.convert_to_unicode(line[3])
             text_b = None
             if set_type == "test":
-                label = "0"
+                #label = "0"
+                label = tokenization.convert_to_unicode(line[1])
             else:
                 label = tokenization.convert_to_unicode(line[1])
             examples.append(
                 InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
         return examples
 
+class THUCNewsProcessor(DataProcessor):
+    """Processor for the THUCNews data set (GLUE version)."""
+
+    def get_train_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_txt(os.path.join(data_dir, "train.txt")), "train")
+
+    def get_dev_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_txt(os.path.join(data_dir, "dev.txt")), "dev")
+
+    def get_test_examples(self, data_dir):
+        """See base class."""
+        return self._create_examples(
+            self._read_txt(os.path.join(data_dir, "test.txt")), "test")
+
+    def get_labels(self):
+        """See base class."""
+        labels = []
+        for i in range(14):
+            labels.append(str(i))
+        return labels
+
+    def _create_examples(self, lines, set_type):
+        """Creates examples for the training and dev sets."""
+        examples = []
+        for (i, line) in enumerate(lines):
+            if i == 0 or len(line) < 3:
+                continue
+            guid = "%s-%s" % (set_type, i)
+            text_a = tokenization.convert_to_unicode(line[3])
+            text_b = None
+            label = tokenization.convert_to_unicode(line[0])
+            examples.append(
+                InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
+        return examples
 
 class XnliProcessor(DataProcessor):
     """Processor for the XNLI data set."""
@@ -1183,9 +1267,10 @@ def main(_):
         "xnli": XnliProcessor,
         "tnews": TnewsProcessor,
         "inews": InewsProcessor,
-	"thucnews":THUCNewsProcessor,
+	      "thucnews":THUCNewsProcessor,
         "lcqmc": LCQMCProcessor,
-        "bq": BQProcessor
+        "bq": BQProcessor,
+        "iflydata":iFLYTEKDataProcessor
     }
 
     tokenization.validate_case_matches_checkpoint(FLAGS.do_lower_case,
